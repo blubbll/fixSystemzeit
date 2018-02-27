@@ -1,16 +1,30 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace fixSystemzeit
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        public static DateTime FromUnixTime(string epoc)
+        {
+            DateTime exactDT = new DateTime(1970, 1, 1, 0, 0, 0).AddMilliseconds(Convert.ToDouble(epoc));
+            return (exactDT.AddHours(1));//UTC + 1;
+        }
+
+        public static string getDatum(string epoc)
+        {
+            DateTime date = FromUnixTime(epoc);
+            return date.ToString("dd.MM.yyyy");
+        }
+
+        public static string getTime(string epoc)
+        {
+            DateTime date = FromUnixTime(epoc);
+            return date.ToString("HH:mm:ss");
+        }
+
+        private static void Main(string[] args)
         {
             var d = "";
             using (WebClient wc = new WebClient())
@@ -21,21 +35,16 @@ namespace fixSystemzeit
 
                 string epoc = stuff.time;
 
-
                 var test1 = getDatum(epoc);
                 var test2 = getTime(epoc);
 
                 setDate(getDatum(epoc));
 
-               setTime(getTime(epoc));
-
+                setTime(getTime(epoc));
             }
-
-            
         }
 
-
-             static void setDate(string dateInYourSystemFormat)
+        private static void setDate(string Datum)
         {
             var proc = new System.Diagnostics.ProcessStartInfo();
             proc.UseShellExecute = true;
@@ -43,25 +52,7 @@ namespace fixSystemzeit
             proc.CreateNoWindow = true;
             proc.FileName = @"C:\Windows\System32\cmd.exe";
             proc.Verb = "runas";
-            proc.Arguments = "/C date " + dateInYourSystemFormat;
-            try
-            {
-                System.Diagnostics.Process.Start(proc);
-            }
-            catch
-            {
-                Console.WriteLine("Konnte Uhrzeit nicht fixen");
-            }
-        }
-        static void setTime(string timeInYourSystemFormat)
-        {
-            var proc = new System.Diagnostics.ProcessStartInfo();
-            proc.UseShellExecute = true;
-            proc.WorkingDirectory = @"C:\Windows\System32";
-            proc.CreateNoWindow = true;
-            proc.FileName = @"C:\Windows\System32\cmd.exe";
-            proc.Verb = "runas";
-            proc.Arguments = "/C time " + timeInYourSystemFormat;
+            proc.Arguments = "/C date " + Datum;
             try
             {
                 System.Diagnostics.Process.Start(proc);
@@ -72,27 +63,23 @@ namespace fixSystemzeit
             }
         }
 
-
-        public static string getDatum(string epoc)
+        private static void setTime(string Zeit)
         {
-            DateTime date = FromUnixTime(epoc);
-            //return (date.Day + "." + date.Month + "." + date.Year);
-            return date.ToString("dd.MM.yyyy");
+            var proc = new System.Diagnostics.ProcessStartInfo();
+            proc.UseShellExecute = true;
+            proc.WorkingDirectory = @"C:\Windows\System32";
+            proc.CreateNoWindow = true;
+            proc.FileName = @"C:\Windows\System32\cmd.exe";
+            proc.Verb = "runas";
+            proc.Arguments = "/C time " + Zeit;
+            try
+            {
+                System.Diagnostics.Process.Start(proc);
+            }
+            catch
+            {
+                Console.WriteLine("Konnte Uhrzeit nicht fixen");
+            }
         }
-
-        public static string getTime(string epoc)
-        {
-            DateTime date = FromUnixTime(epoc);
-            //return (date.Hour + ":" + date.Minute + ":" + date.Second + "," + date.Millisecond);
-            return date.ToString("HH:mm:ss");
-        }
-
-        public static DateTime FromUnixTime(string unixTimeStamp)
-        {
-            DateTime exactDT = new DateTime(1970, 1, 1, 0, 0, 0).AddMilliseconds(Convert.ToDouble(unixTimeStamp));
-            return (exactDT.AddHours(1));//UTC + 1;
-        }
-
     }
-
 }
