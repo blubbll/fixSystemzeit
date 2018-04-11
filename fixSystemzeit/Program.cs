@@ -9,7 +9,10 @@ namespace fixSystemzeit
         public static DateTime FromUnixTime(string epoc)
         {
             DateTime exactDT = new DateTime(1970, 1, 1, 0, 0, 0).AddMilliseconds(Convert.ToDouble(epoc));
-            return (exactDT.AddHours(1));//UTC + 1;
+            if(!TimeZoneInfo.Local.IsDaylightSavingTime(DateTime.Now))//Sommerzeit
+                return (exactDT.AddHours(2));//UTC + 1;
+            else
+                return (exactDT.AddHours(1));//Winterzeit
         }
 
         public static string getDatum(string epoc)
@@ -26,7 +29,6 @@ namespace fixSystemzeit
 
         private static void Main(string[] args)
         {
-            var d = "";
             using (WebClient wc = new WebClient())
             {
                 var json = wc.DownloadString("https://www.uhrzeit.org/time/sync.php");
